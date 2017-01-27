@@ -1,5 +1,5 @@
 # Script to compile and plot data from iButtons
-
+# Updated 2017-Jan-27
 
 # Libraries ---------------------------------------------------------------
 
@@ -7,7 +7,10 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 library(caTools)
-library(readr) # part of the "tidyverse" which if you install.packages("tidyverse") will give you most of these (dplyr, ggplot2, readr, tidyr, etc)
+library(readr) # part of the "tidyverse" which if you install.packages
+library(viridis)
+#("tidyverse") will give you most of these (dplyr, ggplot2, readr, tidyr, etc)
+
 
 # Import ibutton files and compile ----------------------------------------
 
@@ -62,7 +65,7 @@ ggplot() +
 
 ggplot() + 
   geom_line(data=ibuttons[month(ibuttons$datetime_s) < 9,], aes(x=datetime_s,y=Temp_C, color=Temp_C)) + 
-  xlab("") + ylab(expression(paste("Temperature (",degree,")")))+theme_bw() + scale_color_viridis()
+  xlab("") + ylab(expression(paste("Temperature (",degree,"C)")))+theme_bw() + scale_color_viridis()
 
 # also you should check out the purrr package...it is pretty slick at applying looping type "apply" functions over all kinds of things. Pretty sweet.
 
