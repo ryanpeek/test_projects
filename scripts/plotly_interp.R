@@ -3,12 +3,12 @@
 
 # Packages ----------------------------------------------------------------
 
-library(tidyverse)
+library(tidyverse) # dplyr and other tools
 library(plotly)
-library(akima)
-library(fields)
-library(viridis)
-library(raster)
+library(akima) # interpolation
+library(fields) # plotting/interp
+library(viridis) # for colorscale
+library(raster) # for converting to raster
 
 # Data --------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ plot_ly(rh.linear, x=~x, y=~y, z=~height, marker=list(color=~RH, colorscale=viri
 # alternative method might be a better fit for data
 test.spline <- Tps(data.frame(x,y), z, miles = F, lon.lat = T)
 
-# make grid 90 x 90 to match orig number of points
+# make grid 90 x 90 (can make smaller if you want fewer points)
 fullRH.grid <- predictSurface(test.spline, nx = 90, ny = 90) 
 
 # raster plot
@@ -97,5 +97,4 @@ plot_ly(stacked.dat, x=~x, y=~y, z=~height) %>%
   layout(scene = list(xaxis = list(title = 'Longitude'),
                       yaxis = list(title = 'Latitude'),
                       zaxis = list(title = 'Height')))
-
 
