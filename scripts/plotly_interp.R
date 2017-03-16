@@ -27,7 +27,7 @@ z <- idw$RH
 # Linear Interpolation ----------------------------------------------------
 
 # using the interp linear method:
-s <- interp(x, y, z=idw$RH, linear = TRUE)
+s <- interp(x, y, z=idw$RH, linear = T, nx = 90, ny = 90) # output grid 90x90
 
 glimpse(s) # quick check of data
 
