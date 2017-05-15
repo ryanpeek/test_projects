@@ -43,3 +43,23 @@ links <- nars %>%
 for(i in seq_along(links$url)){
 	httr::GET(links$url[i],httr::write_disk(basename(links$value[i]),overwrite=T))
 }
+
+
+# learnr ------------------------------------------------------------------
+
+devtools::install_github("rstudio/learnr")
+
+library(precis)
+
+precis(mtcars)
+
+library(ggplot2)
+precis(diamonds, histogram = TRUE)
+
+# precis ------------------------------------------------------------------
+
+devtools::install_github("hadley/precis")
+
+# SWIRL -------------------------------------------------------------------
+install.packages(c("swirl", "swirlify"))
+# http://swirlstats.com/instructors.html
