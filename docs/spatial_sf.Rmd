@@ -18,13 +18,13 @@ Newer packages available (namely the `sf` package) make things much simpler and 
 library(ggplot2) # for dev version
 library(dplyr)
 library(sf) # rgdal/rgeos/sp replacement
-#library(tidyverse) # wickedverse
+library(tidyverse) # wickedverse
 library(viridis) #colors
 library(rvest) # scraping data
 library(leaflet)
 library(rgdal)
-EPSG <- make_EPSG()
-EPSG[grep("aea", EPSG$note, ignore.case=TRUE), 1:2]
+#EPSG <- make_EPSG()
+#EPSG[grep("aea", EPSG$note, ignore.case=TRUE), 1:2]
 ```
 
 ### Reading in Shapes
@@ -32,7 +32,7 @@ EPSG[grep("aea", EPSG$note, ignore.case=TRUE), 1:2]
 Turns out the `sf` package is much faster and more streamlined at reading in large spatial data. This is a set of **22,676** polygons with 20 fields total (about a 530MB shapefile). It takes just over 4 seconds with `sf`.
 
 ```{r readingshps_sf, eval=F}
-system.time(h12_sf <- st_read("data/Western_HUC12_update_cws.shp", stringsAsFactors = F))
+system.time(h12_sf <- st_read("~/Dropbox/R/PROJECTS/GIS_workshop_2017/data/Western_HUC12_update_cws.shp", stringsAsFactors = F))
 
 object.size(h12_sf)
 glimpse(h12_sf) # see dataframe with list-col geometry col
@@ -43,7 +43,8 @@ The same operation using traditional `sp::readOGR` takes a little over 16 second
 
 ```{r readingshps_sp, eval=F}
 library(rgdal)
-system.time(h12_sp <- readOGR("data","Western_HUC12_update_cws", stringsAsFactors = F))
+dsn <- path.expand("~/Dropbox/R/PROJECTS/GIS_workshop_2017/data")
+system.time(h12_sp <- readOGR(dsn = dsn, layer = "Western_HUC12_update_cws"))
 
 object.size(h12_sp)
 str(h12_sp) # lawd have mercy its S4
@@ -57,8 +58,8 @@ It's possible to pull out just the list-column geometries to play with if that's
 
 ```{r diving into sf}
 
-h12_geom <- st_read("data/HUC8_named.shp")
-(h12_geom <- st_geometry(h12_sf))
+h12_geom <- st_read("../data/shps/HUC8_named.shp")
+(h12_geom <- st_geometry(h12_geom))
 attributes(h12_geom)
 h12_geom[[1]] %>% class
 
@@ -73,15 +74,15 @@ Currently need the development version of ggplot2 for this, but it's awesome.
 #devtools::install_github("tidyverse/ggplot2", force=TRUE)
 library(ggplot2)
 
-rivs_sf <- st_read("data/major_rivers_dissolved.shp", stringsAsFactors = F, quiet = TRUE) %>% st_transform(3310)
+rivs_sf <- st_read("../data/shps/major_rivers_dissolved.shp", stringsAsFactors = F, quiet = TRUE) %>% st_transform(3310)
 
 st_crs(rivs_sf) # check crs
 #"+proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +datum=NAD83 +units=m +no_defs"
 
-lakes_sf <- st_read("data/CA_major_lakes_res.shp", stringsAsFactors = T) %>% st_set_crs(3310)
+lakes_sf <- st_read("../data/shps/CA_major_lakes_res.shp", stringsAsFactors = T) %>% st_set_crs(3310)
 st_crs(lakes_sf)
 
-h8 <- st_read("data/HUC8_named.shp", stringsAsFactors = T) %>% st_transform(3310)
+h8 <- st_read("../data/shps/HUC8_named.shp", stringsAsFactors = T) %>% st_transform(3310)
 st_crs(h8)
 # read from sqlite (but can't plot in ggplot) getting
   # Error in if (st_is_longlat(crs)) bb = trim_bb(bb, margin):
@@ -118,7 +119,7 @@ You can also make nice leaflet maps using this package without too much hassle.
 ```{r makeleaflet}
 library(leaflet)
 
-rivers <- st_read("data/CA_major_rivers_CV_SNMdc.shp", stringsAsFactors = F) 
+rivers <- st_read("../data/shps/CA_major_rivers_CV_SNMdc.shp", stringsAsFactors = F) 
 rivers <- st_transform(rivers, crs = 4326) # transform to WGS84
 head(rivers)
 st_proj_info("datum") # look at list of datums
@@ -152,7 +153,7 @@ rivs <- rivs %>%
 
 # write to a shapefile:
 
-st_write(rivs, "data/major_rivers_pisces.shp")
+# st_write(rivs, "../data/shps/major_rivers_pisces.shp")
 
 # Make a Leaflet Map
 
