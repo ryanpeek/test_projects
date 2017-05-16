@@ -13,35 +13,85 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Newer packages available (namely the `sf` package) make things much simpler and more streamlined for reading/writing and working with spatial data. A few nice writeups are [here](https://geographicdatascience.com/2017/01/06/first-impressions-from-sf-the-simple-features-r-package/) and [here](http://walkerke.github.io/2016/12/spatial-pipelines/), or [here](http://strimas.com/r/tidy-sf/). A handy CRS/spatial reference in R is [here](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/OverviewCoordinateReferenceSystems.pdf)
 
-```{r packages}
+First we'll need a few packages for this tutorial.
+
+```{r packages, echo=T}
 #devtools::install_github("tidyverse/ggplot2")
 library(ggplot2) # for dev version
-library(dplyr)
+library(tidyverse) # piping and general tidying
 library(sf) # rgdal/rgeos/sp replacement
-library(tidyverse) # wickedverse
 library(viridis) #colors
-library(rvest) # scraping data
 library(leaflet)
 library(rgdal)
+
+# to view codes for lots of CRS, rgdal has these options:
 #EPSG <- make_EPSG()
 #EPSG[grep("aea", EPSG$note, ignore.case=TRUE), 1:2]
+
 ```
 
 ### Reading in Shapes
 
 Turns out the `sf` package is much faster and more streamlined at reading in large spatial data. This is a set of **22,676** polygons with 20 fields total (about a 530MB shapefile). It takes just over 4 seconds with `sf`.
 
-```{r readingshps_sf, eval=F}
+```{r readingshps_sf, eval=F, echo=T}
 system.time(h12_sf <- st_read("~/Dropbox/R/PROJECTS/GIS_workshop_2017/data/Western_HUC12_update_cws.shp", stringsAsFactors = F))
+as.tibble(h12_sf) 
 
-object.size(h12_sf)
-glimpse(h12_sf) # see dataframe with list-col geometry col
-as.tibble(h12_sf) # plays well with others
+```
+
+Provides nice header with relevant info.
+
+```
+Reading layer `Western_HUC12_update_cws' from data source `/Users/ryanpeek/Dropbox/R/PROJECTS/GIS_workshop_2017/data/Western_HUC12_update_cws.shp' using driver `ESRI Shapefile'
+converted into: POLYGON
+Simple feature collection with 22676 features and 20 fields
+geometry type:  MULTIPOLYGON
+dimension:      XY
+bbox:           xmin: -386100.3 ymin: -868185.9 xmax: 1132472 ymax: 1393179
+epsg (SRID):    NA
+proj4string:    +proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +datum=NAD83 +units=m +no_defs
+
+   user  system elapsed 
+  3.221   0.585   3.846
+``` 
+Object size is still big but smaller than `rgdal`:  
+
+ - `object.size(h12_sf)`: *`504685024 bytes`*
+
+You can also view the data using all the `tidy/dplyr` functions:
+
+ - `glimpse(h12_sf) # see dataframe with list-col geometry col`
+
+```
+Observations: 22,676
+Variables: 21
+$ HUC_8      <chr> "16060004", "16050203", "16050202", "16040107"...
+$ HUC_10     <chr> "1606000405", "1605020302", "1605020201", "160...
+$ HUC_12     <chr> "160600040503", "160502030202", "160502020103"...
+$ ACRES      <dbl> 19002, 25331, 24723, 39546, 14099, 14595, 2346...
+$ NCONTRB_A  <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+$ HU_10_GNIS <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+$ HU_12_GNIS <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA...
+$ HU_10_DS   <chr> "CLOSED BAS", "1605020303", "1605020202", "160...
+$ HU_10_NAME <chr> "Rock Creek", "Bass Flat", "Town of Dayton-Car...
+$ HU_10_MOD  <chr> "NM", "NM", "NM", "GC,IT", "NM", "NM", "NM", "...
+$ HU_10_TYPE <chr> "C", "S", "S", "S", "C", "C", "S", "S", "S", "...
+$ HU_12_DS   <chr> "160600040504", "160502030306", "160502020105"...
+$ HU_12_NAME <chr> "Kingston Creek", "160502030202", "Gold Canyon...
+$ HU_12_MOD  <chr> "NM", "NM", "UA,MA,TF,DM", "GC,IT", "NM", "NM"...
+$ HU_12_TYPE <chr> "S", "S", "S", "S", "S", "S", "S", "S", "S", "...
+$ META_ID    <chr> "NV01", "NV01", "NV01", "NV01", "NV01", "NV01"...
+$ STATES     <chr> "NV", "NV", "NV", "NV", "NV", "NV", "NV", "NV"...
+$ Shape_Leng <dbl> 44626.22, 67707.48, 64078.89, 63693.45, 38386....
+$ Shape_Area <dbl> 76960949, 102545743, 100005384, 160166065, 570...
+$ HUC_6      <chr> "160600", "160502", "160502", "160401", "16050...
+$ geometry   <simple_feature> MULTIPOLYGON(((249516.13340..., MUL...
 ```
 
 The same operation using traditional `sp::readOGR` takes a little over 16 seconds, and is a larger object in R.
 
-```{r readingshps_sp, eval=F}
+```{r readingshps_sp, eval=F, echo=T}
 library(rgdal)
 dsn <- path.expand("~/Dropbox/R/PROJECTS/GIS_workshop_2017/data")
 system.time(h12_sp <- readOGR(dsn = dsn, layer = "Western_HUC12_update_cws"))
@@ -49,14 +99,73 @@ system.time(h12_sp <- readOGR(dsn = dsn, layer = "Western_HUC12_update_cws"))
 object.size(h12_sp)
 str(h12_sp) # lawd have mercy its S4
 ```
+```
+OGR data source with driver: ESRI Shapefile 
+Source: "/Users/ryanpeek/Dropbox/R/PROJECTS/GIS_workshop_2017/data", layer: "Western_HUC12_update_cws"
+with 22676 features
+It has 20 fields
+
+   user  system elapsed 
+ 13.256   2.741  16.126 
+```
+A slightly larger file size as well: 
+ - `object.size(h12_sp)`: *559701824 bytes*
+
+And importantly, the structure of the data is in the Large `SpatialPolygonsDataFrame` format, which is a bit trickier to work with in R.
+
+```
+Formal class 'SpatialPolygonsDataFrame' [package "sp"] with 5 slots
+  ..@ data       :'data.frame':	22676 obs. of  20 variables:
+  .. ..$ HUC_8     : Factor w/ 526 levels "15010001","15010002",..: 145 137 136 123 137 143 142 142 137 142 ...
+  .. ..$ HUC_10    : Factor w/ 3913 levels "1501000101","1501000102",..: 1023 951 946 835 950 1001 993 992 952 992 ...
+  .. ..$ HUC_12    : Factor w/ 20437 levels "150100010101",..: 6313 6020 6000 5495 6017 6226 6200 6195 6023 6199 ...
+  .. ..$ ACRES     : num [1:22676] 19002 25331 24723 39546 14099 ...
+  .. ..$ NCONTRB_A : num [1:22676] 0 0 0 0 0 0 0 0 0 0 ...
+  .. ..$ HU_10_GNIS: Factor w/ 69 levels "10180 34025",..: NA NA NA NA NA NA NA NA NA NA ...
+  .. ..$ HU_12_GNIS: Factor w/ 2003 levels "1001","10032 3953",..: NA NA NA NA NA NA NA NA NA NA ...
+  .. ..$ HU_10_DS  : Factor w/ 1848 levels "0706010103","1206020204",..: 1846 490 488 438 1846 1846 509 508 491 508 ...
+  .. ..$ HU_10_NAME: Factor w/ 3459 levels "1602030617-Frontal Bonneville Salt Flats",..: 2409 127 2893 568 865 1671 3027 759 396 759 ...
+  .. ..$ HU_10_MOD : Factor w/ 674 levels "AD","AD,CD,PD",..: 567 567 567 212 567 567 567 567 567 567 ...
+  .. ..$ HU_10_TYPE: Factor w/ 7 levels "C","F","I","M",..: 1 5 5 5 1 1 5 5 5 5 ...
+  .. ..$ HU_12_DS  : Factor w/ 9720 levels "140102150105",..: 2954 2818 2808 2563 2814 2909 2896 2893 2818 2895 ...
+  .. ..$ HU_12_NAME: Factor w/ 16667 levels "140500030714",..: 6683 257 5036 6732 10812 14678 5575 7615 258 7818 ...
+  .. ..$ HU_12_MOD : Factor w/ 1091 levels "AD","AD,CD,SI,PD",..: 913 913 1088 388 913 913 388 913 913 913 ...
+  .. ..$ HU_12_TYPE: Factor w/ 8 levels "C","F","I","M",..: 6 6 6 6 6 6 6 6 6 6 ...
+  .. ..$ META_ID   : Factor w/ 60 levels "AZ01","AZ02",..: 32 32 32 32 32 32 32 32 32 32 ...
+  .. ..$ STATES    : Factor w/ 47 levels "AZ","AZ,CA","AZ,CA,MX",..: 38 38 38 38 38 38 38 38 38 38 ...
+  .. ..$ Shape_Leng: num [1:22676] 44626 67707 64079 63693 38387 ...
+  .. ..$ Shape_Area: num [1:22676] 7.70e+07 1.03e+08 1.00e+08 1.60e+08 5.71e+07 ...
+  .. ..$ HUC_6     : Factor w/ 72 levels "150100","150200",..: 27 25 25 22 25 27 27 27 25 27 ...
+  ..@ polygons   :List of 22676
+  .. ..$ :Formal class 'Polygons' [package "sp"] with 5 slots
+  .. .. .. ..@ Polygons :List of 1
+  .. .. .. .. ..$ :Formal class 'Polygon' [package "sp"] with 5 slots
+  .. .. .. .. .. .. ..@ labpt  : num [1:2] 246070 140145
+  .. .. .. .. .. .. ..@ area   : num 7.7e+07
+  .. .. .. .. .. .. ..@ hole   : logi FALSE
+  .. .. .. .. .. .. ..@ ringDir: int 1
+  .. .. .. .. .. .. ..@ coords : num [1:1179, 1:2] 249516 249524 249538 249549 249552 ...
+  .. .. .. ..@ plotOrder: int 1
+  .. .. .. ..@ labpt    : num [1:2] 246070 140145
+  .. .. .. ..@ ID       : chr "0"
+  .. .. .. ..@ area     : num 7.7e+07
+  .. ..$ :Formal class 'Polygons' [package "sp"] with 5 slots
+  .. .. .. ..@ Polygons :List of 1
+  .. .. .. .. ..$ :Formal class 'Polygon' [package "sp"] with 5 slots
+  .. .. .. .. .. .. ..@ labpt  : num [1:2] 118003 137447
+  .. .. .. .. .. .. ..@ area   : num 1.03e+08
+  .. .. .. .. .. .. ..@ hole   : logi FALSE
+  .. .. .. .. .. .. ..@ ringDir: int 1
+  .. .. .. .. .. .. ..@ coords : num [1:4156, 1:2] 121273 121274 121276 121276 121276 ...
+```
 
 So for a half GB file that saves an immense amount of time, and it's a much cleaner way to work with the data.
 
-#### Looking at Bit Deeper at `sf` objects
+### Looking at Bit Deeper at `sf` objects
 
 It's possible to pull out just the list-column geometries to play with if that's something you need to do.
 
-```{r diving into sf}
+```{r diving into sf, echo=T}
 
 h12_geom <- st_read("../data/shps/HUC8_named.shp")
 (h12_geom <- st_geometry(h12_geom))
@@ -84,11 +193,6 @@ st_crs(lakes_sf)
 
 h8 <- st_read("../data/shps/HUC8_named.shp", stringsAsFactors = T) %>% st_transform(3310)
 st_crs(h8)
-# read from sqlite (but can't plot in ggplot) getting
-  # Error in if (st_is_longlat(crs)) bb = trim_bb(bb, margin):
-  #  missing value where TRUE/FALSE needed
-
-#h8 <- st_read(dsn = "~/Dropbox/gis/pisces.sqlite", "HUC8FullState", stringsAsFactors= T) %>% st_transform(3310)
 
 # make a plot!
 ggplot() +
@@ -97,17 +201,11 @@ ggplot() +
   ggtitle("Lakes & Rivers CA") +
   theme_bw()
 
-# this is crashing computer 
+# This takes a long time (at least a few minutes)
 ggplot() +
-  #geom_sf(data = lakes_sf, color="skyblue") +
-  #geom_sf(data=rivs_sf, color="blue") +
-  geom_sf(data=h8, aes(fill=Shape_Area), show.legend = F,
-          color="gray") + scale_fill_viridis("Area") +
-  #scale_fill_viridis("Feature Type", discrete = T) +
-  ggtitle("Lakes & Rivers CA") +
+  geom_sf(data=h8, show.legend = F, color="gray") +
+  ggtitle("HUC8 in CA") +
   theme_bw()
-
-
 
 ```
 
@@ -116,7 +214,7 @@ ggplot() +
 
 You can also make nice leaflet maps using this package without too much hassle. 
 
-```{r makeleaflet}
+```{r makeleaflet1}
 library(leaflet)
 
 rivers <- st_read("../data/shps/CA_major_rivers_CV_SNMdc.shp", stringsAsFactors = F) 
@@ -129,7 +227,8 @@ rivers <- rivers %>%
 
 rivers %>%
   leaflet() %>%
-  addTiles() %>% 
+  addTiles() %>%
+  addProviderTiles("Esri.WorldTopoMap") %>%
   addPolygons(weight = 1)
 
 ```
@@ -138,7 +237,7 @@ rivers %>%
 
 This is one of the more exciting bits, you can read/write/operate directly with spatial databases.
 
-```{r read a db}
+```{r read a db, echo=T}
 fname <- file.path("~/Dropbox/gis/pisces.sqlite")
 fname
 
@@ -154,6 +253,11 @@ rivs <- rivs %>%
 # write to a shapefile:
 
 # st_write(rivs, "../data/shps/major_rivers_pisces.shp")
+```
+
+### More Leaflet (fancy map)
+
+```{r makeleaflet, echo=T}
 
 # Make a Leaflet Map
 
@@ -161,9 +265,7 @@ leaflet() %>%
   addTiles() %>% 
   addProviderTiles("Esri.WorldImagery", group = "ESRI Aerial") %>%
   addProviderTiles("Esri.WorldTopoMap", group = "Topo") %>%
-  
   addPolylines(data=rivs, group="piscesRivs", weight=1) %>% 
-  
   addPolylines(group = "BigRivs", stroke = 0.8,
                data = rivers, weight=1, color="maroon") %>% 
   
@@ -172,7 +274,6 @@ leaflet() %>%
     overlayGroups = c("piscesRivs",
                       "BigRivs"),
     options = layersControlOptions(collapsed = T))
-
 
 
 ```
