@@ -578,3 +578,51 @@ leaflet() %>%
 ```
 
 ![](spatial_sf_files/figure-markdown_github/makeleaflet-1.png)
+
+### Read in a KML/KMZ
+
+Let's see how it does with this.
+
+``` r
+# read in a kmz of frog points
+
+rb <- st_read("../data/RanaBoylii_RADSeq.kml")
+```
+
+    ## Reading layer `Waypoints' from data source `/Users/ryanpeek/Documents/github/test_projects/data/RanaBoylii_RADSeq.kml' using driver `KML'
+    ## converted into: POINT
+    ## Simple feature collection with 19 features and 2 fields
+    ## geometry type:  POINT
+    ## dimension:      XYZ
+    ## bbox:           xmin: -120.9791 ymin: 38.98487 xmax: -120.6889 ymax: 39.51325
+    ## epsg (SRID):    4326
+    ## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+
+``` r
+rb2 <- rb %>% as("Spatial")
+
+#library(htmltools)
+
+leaflet() %>%
+  addTiles() %>% 
+  addProviderTiles("Esri.WorldImagery", group = "ESRI Aerial") %>%
+  addProviderTiles("Esri.WorldTopoMap", group = "Topo") %>%
+  addCircleMarkers(data=rb, group="RABO", weight=1, color = "orange", opacity = 0.7, labelOptions= labelOptions(noHide = F,
+      style = list(
+        "color" = "black",
+        "font-family" = "serif",
+        "font-style" = "italic",
+        "box-shadow" = "3px 3px rgba(0,0,0,0.25)",
+        "font-size" = "12px",
+        "border-color" = "rgba(0,0,0,0.5)"
+      )),
+      label = paste0("FieldID: ", rb$Name,
+                     "Description: ", rb$Description)) %>%
+
+  addLayersControl(
+    baseGroups = c("ESRI Aerial", "Topo"),
+    overlayGroups = c("RABO"),
+    options = layersControlOptions(collapsed = T))
+```
+
+![](spatial_sf_files/figure-markdown_github/readkml-1.png)
