@@ -48,10 +48,24 @@ for(i in seq_along(links$url)){
 # learnr ------------------------------------------------------------------
 
 devtools::install_github("rstudio/learnr")
+library(learnr)
+
+learnr::run_tutorial("slidy", package = "learnr")
+
+
+# resumer -----------------------------------------------------------------
+
+
+# bookdown ----------------------------------------------------------------
+
+
+
+
+# PRECIS ------------------------------------------------------------------
+
 
 library(precis)
-
-precis(mtcars)
+precis(mtcars, histogram=T)
 
 library(ggplot2)
 precis(diamonds, histogram = TRUE)
@@ -60,6 +74,3 @@ precis(diamonds, histogram = TRUE)
 
 devtools::install_github("hadley/precis")
 
-# SWIRL -------------------------------------------------------------------
-install.packages(c("swirl", "swirlify"))
-# http://swirlstats.com/instructors.html

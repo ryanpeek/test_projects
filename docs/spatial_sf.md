@@ -16,6 +16,9 @@ library(ggplot2) # for dev version
 library(tidyverse) # piping and general tidying
 ```
 
+    ## Warning: Installed Rcpp (0.12.12) different from Rcpp used to build dplyr (0.12.11).
+    ## Please reinstall dplyr to avoid random crashes or undefined behavior.
+
     ## Loading tidyverse: tibble
     ## Loading tidyverse: tidyr
     ## Loading tidyverse: readr
@@ -47,13 +50,13 @@ library(rgdal)
 
     ## Loading required package: sp
 
-    ## rgdal: version: 1.2-7, (SVN revision 660)
+    ## rgdal: version: 1.2-8, (SVN revision 663)
     ##  Geospatial Data Abstraction Library extensions to R successfully loaded
     ##  Loaded GDAL runtime: GDAL 2.1.3, released 2017/20/01
-    ##  Path to GDAL shared files: /Library/Frameworks/R.framework/Versions/3.4/Resources/library/rgdal/gdal
+    ##  Path to GDAL shared files: /usr/local/Cellar/gdal2/2.1.3_3/share/gdal
     ##  Loaded PROJ.4 runtime: Rel. 4.9.3, 15 August 2016, [PJ_VERSION: 493]
-    ##  Path to PROJ.4 shared files: /Library/Frameworks/R.framework/Versions/3.4/Resources/library/rgdal/proj
-    ##  Linking to sp version: 1.2-4
+    ##  Path to PROJ.4 shared files: (autodetected)
+    ##  Linking to sp version: 1.2-5
 
 ``` r
 # to view codes for lots of CRS, rgdal has these options:
@@ -196,7 +199,6 @@ h12_geom <- st_read("../data/shps/HUC8_named.shp")
 ```
 
     ## Reading layer `HUC8_named' from data source `/Users/ryanpeek/Documents/github/test_projects/data/shps/HUC8_named.shp' using driver `ESRI Shapefile'
-    ## converted into: POLYGON
     ## Simple feature collection with 177 features and 12 fields
     ## geometry type:  MULTIPOLYGON
     ## dimension:      XY
@@ -267,7 +269,7 @@ Currently need the development version of ggplot2 for this, but it's awesome.
 #devtools::install_github("tidyverse/ggplot2", force=TRUE)
 library(ggplot2)
 
-rivs_sf <- st_read("../data/shps/major_rivers_dissolved.shp", stringsAsFactors = F, quiet = TRUE) %>% st_transform(3310)
+rivs_sf <- st_read("../data/shps/CA_major_rivers_CV_SNMdc.shp", stringsAsFactors = F, quiet = TRUE) %>% st_transform(3310)
 
 st_crs(rivs_sf) # check crs
 ```
@@ -288,7 +290,6 @@ lakes_sf <- st_read("../data/shps/CA_major_lakes_res.shp", stringsAsFactors = T)
 ```
 
     ## Reading layer `CA_major_lakes_res' from data source `/Users/ryanpeek/Documents/github/test_projects/data/shps/CA_major_lakes_res.shp' using driver `ESRI Shapefile'
-    ## converted into: POLYGON
     ## Simple feature collection with 179 features and 7 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -314,7 +315,6 @@ h8 <- st_read("../data/shps/HUC8_named.shp", stringsAsFactors = T) %>% st_transf
 ```
 
     ## Reading layer `HUC8_named' from data source `/Users/ryanpeek/Documents/github/test_projects/data/shps/HUC8_named.shp' using driver `ESRI Shapefile'
-    ## converted into: POLYGON
     ## Simple feature collection with 177 features and 12 fields
     ## geometry type:  MULTIPOLYGON
     ## dimension:      XY
@@ -344,7 +344,7 @@ ggplot() +
   theme_bw()
 ```
 
-![](spatial_sf_files/figure-markdown_github/ggplot-1.png)
+![](spatial_sf_files/figure-markdown_github-ascii_identifiers/ggplot-1.png)
 
 ``` r
 # This takes a long time (at least a few minutes)
@@ -354,7 +354,7 @@ ggplot() +
   theme_bw()
 ```
 
-![](spatial_sf_files/figure-markdown_github/ggplot-2.png)
+![](spatial_sf_files/figure-markdown_github-ascii_identifiers/ggplot-2.png)
 
 ### Piping to Leaflet
 
@@ -363,15 +363,14 @@ You can also make nice leaflet maps using this package without too much hassle.
 ``` r
 library(leaflet)
 
-rivers <- st_read("../data/shps/CA_major_rivers_CV_SNMdc.shp", stringsAsFactors = F) 
+rivers <- st_read("../data/shps/major_rivers_dissolved.shp", stringsAsFactors = F) 
 ```
 
-    ## Reading layer `CA_major_rivers_CV_SNMdc' from data source `/Users/ryanpeek/Documents/github/test_projects/data/shps/CA_major_rivers_CV_SNMdc.shp' using driver `ESRI Shapefile'
-    ## converted into: MULTILINESTRING
-    ## Simple feature collection with 7730 features and 22 fields
+    ## Reading layer `major_rivers_dissolved' from data source `/Users/ryanpeek/Documents/github/test_projects/data/shps/major_rivers_dissolved.shp' using driver `ESRI Shapefile'
+    ## Simple feature collection with 642 features and 26 fields
     ## geometry type:  MULTILINESTRING
     ## dimension:      XY
-    ## bbox:           xmin: -221740.5 ymin: -305695.9 xmax: 171829.4 ymax: 386294.2
+    ## bbox:           xmin: -372136.6 ymin: -603462.5 xmax: 540081.7 ymax: 450123.9
     ## epsg (SRID):    NA
     ## proj4string:    +proj=aea +lat_1=34 +lat_2=40.5 +lat_0=0 +lon_0=-120 +x_0=0 +y_0=-4000000 +datum=NAD83 +units=m +no_defs
 
@@ -380,40 +379,47 @@ rivers <- st_transform(rivers, crs = 4326) # transform to WGS84
 head(rivers)
 ```
 
-    ## Simple feature collection with 6 features and 22 fields
+    ## Simple feature collection with 6 features and 26 fields
     ## geometry type:  MULTILINESTRING
     ## dimension:      XY
-    ## bbox:           xmin: -122.3074 ymin: 40.00028 xmax: -120.5579 ymax: 41.49236
+    ## bbox:           xmin: -123.7679 ymin: 32.67473 xmax: -115.3484 ymax: 39.81825
     ## epsg (SRID):    4326
     ## proj4string:    +proj=longlat +datum=WGS84 +no_defs
-    ##   OBJECTID SUM_Shape_ FNODE_ TNODE_ MAJOR1 MINOR1 HYD_FEAT_1 FEATURE_CL
-    ## 1      156   419993.9    808    806     50    412        159  perennial
-    ## 2     6372        0.0  25621  24718     50    200          0       <NA>
-    ## 3     6373        0.0  25591  25621     50    200          0       <NA>
-    ## 4     7129        0.0  28204  28318     50    412          0       <NA>
-    ## 5     5858        0.0  22682  22808     50    412          0       <NA>
-    ## 6     5862        0.0  22808  22823     50    412          0       <NA>
-    ##            HYDNAME Shape_Leng Shape_Le_1    LENGTH HYDRARCA_ HYDRARCA_I
-    ## 1        Pit River  1668.7124   419993.9    0.0000         0          0
-    ## 2 NF Feather River  8380.2171        0.0 8380.1603     26358       4736
-    ## 3 NF Feather River  1070.6357        0.0 1070.6343     26359       4737
-    ## 4 NF Feather River   908.9977        0.0  908.9871     29098       6117
-    ## 5 NF Feather River  1332.2708        0.0 1332.2457     23410       3292
-    ## 6 NF Feather River   859.0326        0.0  859.0162     23428       3298
-    ##   TDCKEY      DCU           PNAME       PNMCD STATECODE HSCKEY HYSNUM
-    ## 1      0        0            <NA>        <NA>      <NA>      0      0
-    ## 2 377606 18020121 FEATHER R, N FK 18020121002         1   3776      6
-    ## 3 377706 18020121 FEATHER R, N FK 18020121002         1   3777      6
-    ## 4 494706 18020121 FEATHER R, N FK 18020121002         1   4947      6
-    ## 5 259806 18020121 FEATHER R, N FK 18020121002         1   2598      6
-    ## 6 260306 18020121 FEATHER R, N FK 18020121002         1   2603      6
-    ##     Element                       geometry
-    ## 1      <NA> MULTILINESTRING((-122.24484...
-    ## 2 Shoreline MULTILINESTRING((-121.08593...
-    ## 3 Shoreline MULTILINESTRING((-121.09637...
-    ## 4    Stream MULTILINESTRING((-121.26335...
-    ## 5    Stream MULTILINESTRING((-121.47271...
-    ## 6    Stream MULTILINESTRING((-121.46104...
+    ##   HYD_FEATUR SUM_Shape_ OBJECTID_1 FNODE_ TNODE_ LPOLY_ RPOLY_ major_rive
+    ## 1          0  14349.750      19173  17981  17983      0      0 14358.0927
+    ## 2          1  91845.529      18620  17494  17490     -1     -1  1491.5735
+    ## 3          2  28911.672       6679   6404   6384     -1     -1   582.6097
+    ## 4          3   1815.001       6816   6532   6491     -1     -1  1816.9833
+    ## 5          4   6996.029       6585   6313   6312     -1     -1  1231.1800
+    ## 6          5   8552.818       6773   6488   6447     -1     -1  1628.7500
+    ##   HYDLCA_ HYDLCA_ID MAJOR1 MINOR1 MAJOR2 MINOR2 MAJOR3 MINOR3 MAJOR4
+    ## 1   19173         1      0      0      0      0      0      0      0
+    ## 2   18620      3255     50    412 -99999 -99999 -99999 -99999 -99999
+    ## 3    6679      3209     50    412 -99999 -99999 -99999 -99999 -99999
+    ## 4    6816      4215     50    412     50    610 -99999 -99999 -99999
+    ## 5    6585      3296     50    412 -99999 -99999 -99999 -99999 -99999
+    ## 6    6773      4197     50    412 -99999 -99999 -99999 -99999 -99999
+    ##   MINOR4 COORD_SOUR HYD_FEAT_1   FEATURE_CL COURSE_CL
+    ## 1      0   100k map          0         <NA>      <NA>
+    ## 2 -99999   100K DLG          1    perennial      <NA>
+    ## 3 -99999   100K DLG          2    perennial      <NA>
+    ## 4 -99999   100K DLG          3 intermittent      <NA>
+    ## 5 -99999   100K DLG          4    perennial      <NA>
+    ## 6 -99999   100K DLG          5    perennial      <NA>
+    ##                                        HYDNAME FEATURE_TY Shape_Leng
+    ## 1                                         <NA>       <NA> 14349.7501
+    ## 2                                  Alamo River      river  1491.3395
+    ## 3                                 Albion River      river   581.8751
+    ## 4 Little North Fork of South Fork Albion River      river  1815.0007
+    ## 5                      North Fork Albion River      river  1229.2222
+    ## 6                      South Fork Albion River      river  1626.5045
+    ##   Shape_Le_1                       geometry
+    ## 1  14349.750 MULTILINESTRING((-122.32491...
+    ## 2  91845.529 MULTILINESTRING((-115.37021...
+    ## 3  28911.672 MULTILINESTRING((-123.76787...
+    ## 4   1815.001 MULTILINESTRING((-123.64669...
+    ## 5   6996.029 MULTILINESTRING((-123.60718...
+    ## 6   8552.818 MULTILINESTRING((-123.61594...
 
 ``` r
 st_proj_info("datum") # look at list of datums
@@ -464,7 +470,7 @@ rivers %>%
   addPolygons(weight = 1)
 ```
 
-![](spatial_sf_files/figure-markdown_github/makeleaflet1-1.png)
+![](spatial_sf_files/figure-markdown_github-ascii_identifiers/makeleaflet1-1.png)
 
 ### Databases with `sf`
 
@@ -500,7 +506,6 @@ rivs <- st_read(fname, "major_rivers")
 ```
 
     ## Reading layer `major_rivers' from data source `/Users/ryanpeek/Dropbox/gis/pisces.sqlite' using driver `SQLite'
-    ## converted into: MULTILINESTRING
     ## Simple feature collection with 19178 features and 23 fields
     ## geometry type:  MULTILINESTRING
     ## dimension:      XY
@@ -577,7 +582,7 @@ leaflet() %>%
     options = layersControlOptions(collapsed = T))
 ```
 
-![](spatial_sf_files/figure-markdown_github/makeleaflet-1.png)
+![](spatial_sf_files/figure-markdown_github-ascii_identifiers/makeleaflet-1.png)
 
 ### Read in a KML/KMZ
 
@@ -589,9 +594,8 @@ Let's see how it does with this.
 rb <- st_read("../data/RanaBoylii_RADSeq.kml")
 ```
 
-    ## Reading layer `Waypoints' from data source `/Users/ryanpeek/Documents/github/test_projects/data/RanaBoylii_RADSeq.kml' using driver `KML'
-    ## converted into: POINT
-    ## Simple feature collection with 19 features and 2 fields
+    ## Reading layer `Waypoints' from data source `/Users/ryanpeek/Documents/github/test_projects/data/RanaBoylii_RADSeq.kml' using driver `LIBKML'
+    ## Simple feature collection with 19 features and 11 fields
     ## geometry type:  POINT
     ## dimension:      XYZ
     ## bbox:           xmin: -120.9791 ymin: 38.98487 xmax: -120.6889 ymax: 39.51325
@@ -625,4 +629,4 @@ leaflet() %>%
     options = layersControlOptions(collapsed = T))
 ```
 
-![](spatial_sf_files/figure-markdown_github/readkml-1.png)
+![](spatial_sf_files/figure-markdown_github-ascii_identifiers/readkml-1.png)
