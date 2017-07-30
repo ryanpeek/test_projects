@@ -10,6 +10,7 @@
 # "CatterPlots"
 # "ggraph"
 # "hrbrthemes"
+# devtools::install_github("LFOD/GMD")
 
 library(devtools)
 install_github("Gibbsdavidl/CatterPlots")
