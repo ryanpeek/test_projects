@@ -6,6 +6,23 @@ library(dplyr)
 
 station_data<-readRDS("data/NOAA_station_data.rds")
 
+
+# leaflet map
+leaflet() %>%
+  addTiles() %>% 
+  addProviderTiles("Esri.WorldImagery", group = "ESRI Aerial") %>%
+  addProviderTiles("Esri.WorldTopoMap", group = "Topo") %>%
+  addCircleMarkers(group = "NOAA", stroke = 0.8, radius = 1,opacity = 0.7, fillOpacity = 0.8, 
+                   lng = ~longitude, lat = ~latitude,
+                   data = station_data, weight=1, color="maroon") %>% 
+  addLayersControl(
+    baseGroups = c("ESRI Aerial", "Topo"),
+    overlayGroups = c("NOAA"),
+    options = layersControlOptions(collapsed = T))
+
+
+
+
 lat_lon_df <- data.frame(id = c("davis", "san francisco"),
                          latitude = c(38.5449, 37.7749),
                          longitude = c(-121.7405, -122.4194))
