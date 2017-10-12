@@ -1,5 +1,9 @@
 # plotly interp figure for Andres
 # 2017 - R. Peek
+### IF ISSUES, try reinstalling older version of plotly
+
+# devtools::install_version("plotly", version = "4.5.6", 
+#                           repos = "http://cran.us.r-project.org")
 
 # Packages ----------------------------------------------------------------
 
@@ -24,6 +28,12 @@ x <- idw$Longitude # longitude is X typically
 y <- idw$Latitude
 z <- idw$RH
 
+# Plotly Plot
+plot_ly(idw, x=~x, y=~y, z=~Height, 
+        marker=list(color=~RH, colorscale=viridis(n = 12), show.scale=TRUE)) %>%
+  add_markers()
+  
+  
 # Linear Interpolation ----------------------------------------------------
 
 # using the interp linear method:
@@ -47,7 +57,8 @@ rh.linear <- as.data.frame(rasterToPoints(rh.l)) %>%
   mutate(height=mean(idw$Height))
 
 # Plotly Plot
-plot_ly(rh.linear, x=~x, y=~y, z=~height, marker=list(color=~RH, colorscale=viridis(n = 12), show.scale=TRUE)) %>%
+plot_ly(rh.linear, x=~x, y=~y, z=~height, 
+        marker=list(color=~RH, colorscale=viridis(n = 12), show.scale=TRUE)) %>%
   add_markers() 
 
 # Spline Interpolation ----------------------------------------------------
@@ -72,8 +83,37 @@ rh.spline <- as.data.frame(rasterToPoints(rh.sp)) %>%
   mutate(height=mean(idw$Height))
 
 # Plotly Plot
-plot_ly(rh.spline, x=~x, y=~y, z=~height, marker=list(color=~RH, colorscale=viridis(n = 12), show.scale=TRUE)) %>%
-  add_markers() 
+plot_ly(data = rh.spline, x=~x, y=~y, z=~height) %>% 
+  add_markers(marker=list(colorscale=viridis(n = 12), color=~RH), showlegend=TRUE)
+
+# set axis 
+axx <- list(
+  nticks = 5,
+  title="X Lon",
+  autorange = "reversed",
+  range = c(-121.525, -121.508)
+)
+
+axy <- list(
+  nticks = 5,
+  title="Y Lat",
+  autorange = "reversed",
+  range = c(38.191, 38.194)
+)
+
+axz <- list(
+  nticks = 5,
+  title="height",
+  range = c(5.5,6.5)
+)
+
+plot_ly(rh.linear, x=~x, y=~y, z=~height, 
+        marker=list(color=~RH, colorscale=viridis(n = 12), 
+                    showscale=TRUE)) %>% 
+  layout(scene = list(xaxis=axx,
+                      yaxis=axy,
+                      zaxis=axz)) %>%
+  add_markers()
 
 # Make A Stacked Plot -----------------------------------------------------
 
