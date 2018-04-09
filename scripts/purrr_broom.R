@@ -41,8 +41,18 @@ full_join(unnest(df_model, glance) %>% select(Site_id, Spcod, r.squared),
   spread(term, estimate) 
 
 
+
+
 unnest(df_model, tidy)
 
 unnest(df_model, glance)
 
 unnest(df_model, augment)
+
+
+
+# look at using custom function for looping through objects (eval & parse)
+
+str_eval <- function(x) return(eval(parse(text=x)))
+
+str_eval("2")
