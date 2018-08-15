@@ -17,8 +17,8 @@ install_github("Gibbsdavidl/CatterPlots")
 library(CatterPlots)
 x <- -10:10
 y <- -x^2 + 10
-purr <- catplot(xs=x, ys=y, cat=3, catcolor=c(0,1,1,1))
-cats(purr, -x, -y, cat=4, catcolor=c(1,0,1,1))
+purr <- catplot(xs=x, ys=y, cat=3, catcolor=c(0.1,1,1,1))
+cats(purr, -x, -y, cat=4, catcolor=c(1,0.1,1,1))
 x <- rnorm(n = 25)
 y <- rnorm(n = 25)
 
